@@ -1,3 +1,5 @@
+const uuid = require("uuid/v4");
+
 const UUID_LEN = 128;
 const CIDR_LEN = 128;
 const INET_LEN = 128;
@@ -51,6 +53,10 @@ class DataType {
 		return null;
 	}
 
+	serialize () {
+		return this.constructor.name + "/" + this.name + "/" + this.type;
+	}
+
 }
 
 class NumberType extends DataType {
@@ -99,6 +105,10 @@ class NumberType extends DataType {
 
 	toString (value) {
 		return value + "";
+	}
+
+	serialize () {
+		return super.serialize() + " " + JSON.stringify({ min: this.min, max: this.max, mul: this.mul });
 	}
 
 }
@@ -267,6 +277,10 @@ class StringType extends DataType {
 		return this.value;
 	}
 
+	serialize () {
+		return super.serialize() + " " + JSON.stringify({ maxlen: this.maxlen, encoding: this.encoding });
+	}
+
 }
 
 class STRING extends StringType {
@@ -343,6 +357,10 @@ class UUID extends StringType {
 		this.name = "UUID";
 	}
 
+	getDefault () {
+		return uuid();
+	}
+
 }
 
 class CIDR extends StringType {
@@ -414,6 +432,10 @@ class DateType extends DataType {
 		return value.toISOString();
 	}
 
+	serialize () {
+		return super.serialize() + " " + JSON.stringify({ date: this.date, time: this.time });
+	}
+
 }
 
 class DATETIME extends DateType {
@@ -474,10 +496,63 @@ const Types = {
 
 };
 
+const Calls = {
+
+	STRING: { maxlen: 255 },
+	BINARY: { maxlen: 255 },
+	TEXT: {},
+	TINYTEXT: {},
+	CITEXT: {},
+	INTEGER: { max: Infinity },
+	BIGINT: { max: Infinity },
+	FLOAT: { min: -Infinity, max: Infinity },
+	REAL: { min: -Infinity, max: Infinity },
+	DOUBLE: { min: -Infinity, max: Infinity },
+	DATETIME: {},
+	DATEONLY: {},
+	TIMEONLY: {},
+	BOOLEAN: {},
+	ENUM: {},
+	ARRAY: {},
+	JSON: {},
+	JSONB: {},
+	BLOB: {},
+	TINYBLOB: {},
+	UUID: {},
+	CIDR: {},
+	INET: {},
+	MACADDR: {},
+	RANGE: {},
+	GEOMETRY: {}
+
+};
+
+const getCall = function (type) {
+	let call = type.constructor.name;
+	let ret = call + "(";
+	let args = [];
+	call = Calls[call];
+	let lastDefault = -1;
+	for (let i in call) {
+		args.push(type[i]);
+		if (type[i] === call[i])
+			lastDefault = args.length-1;
+	}
+	if (lastDefault !== -1)
+		args = args.slice(0, lastDefault);
+	ret += args.join(", ");
+	ret += ")";
+	return ret;
+};
+
 module.exports.Relationship = Relationship;
 module.exports.Primitive = Primitive;
 module.exports.DataType = DataType;
 module.exports.Types = Types;
+module.exports.Calls = Calls;
+
+module.exports.getCall = getCall;
+
 module.exports.NumberType = NumberType;
 module.exports.FloatType = FloatType;
 module.exports.IntegerType = IntegerType;
