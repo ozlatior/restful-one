@@ -7,8 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "uuid": "^3.3.3",
-    "util-one": "*"
+    "inflection": "*",
+    "util-one": "*",
+    "uuid": "^3.3.3"
   },
   "keywords": [
     "restful",
