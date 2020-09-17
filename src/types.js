@@ -13,11 +13,36 @@ const Relationship = {
 };
 
 const Primitive = {
-	BOOLEAN: (a) => typeof(a) === "boolean",
-	NUMBER: (a) => typeof(a) === "number",
-	STRING: (a) => typeof(a) === "string",
-	OBJECT: (a) => typeof(a) === "object",
-	DATE: (a) => (typeof(a) === "object") && (a instanceof Date)
+	BOOLEAN: {
+		name: "BOOLEAN",
+		fromString: (str) => [ "1", "t", "true", "yes" ].indexOf(a.toLowerCase()) !== -1,
+		isValid: (a) => typeof(a) === "boolean",
+		isValidStr: (a) => [ "0", "1", "t", "f", "true", "false", "yes", "no" ].indexOf(a.toLowerCase()) !== -1
+	},
+	NUMBER: {
+		name: "NUMBER",
+		fromString: (str) => parseFloat(str),
+		isValid: (a) => typeof(a) === "number",
+		isValidStr: (a) => true // TODO: proper validation
+	},
+	STRING: {
+		name: "STRING",
+		fromString: (str) => str,
+		isValid: (a) => typeof(a) === "string",
+		isValidStr: (a) => true
+	},
+	OBJECT: {
+		name: "OBJECT",
+		fromString: (str) => JSON.parse(str),
+		isValid: (a) => typeof(a) === "object",
+		isValidStr: (a) => true
+	},
+	DATE: {
+		name: "DATE",
+		fromString: (str) => new Date(str),
+		isValid: (a) => (typeof(a) === "object") && (a instanceof Date),
+		isValidStr: (a) => true
+	}
 };
 
 class DataType {
@@ -59,13 +84,17 @@ class DataType {
 		return (this.properties.absentValue !== null);
 	}
 
+	getPrimitive () {
+		return this.primitive;
+	}
+
 	getDefault () {
 		return null;
 	}
 
 	isValid (value) {
 		if (this.primitive !== null)
-			return this.primitive(value);
+			return this.primitive.isValid(value);
 		return false;
 	}
 
