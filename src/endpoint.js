@@ -1,5 +1,7 @@
 const inflection = require("inflection");
 
+const ListSyntax = require("./endpoint_syntax.js").ListSyntax;
+
 const Method = {
 	GET: {
 		name: "GET"
@@ -23,31 +25,36 @@ const Type = {
 		name: "create",
 		method: Method.PUT,
 		path: (model) => "/" + model.getName(),
-		handler: (h) => h.create
+		handler: (h) => h.create,
+		syntax: () => null
 	},
 	RETRIEVE: {
 		name: "retrieve",
 		method: Method.GET,
 		path: (model) => "/" + model.getName() + "/:id",
-		handler: (h) => h.retrieve
+		handler: (h) => h.retrieve,
+		syntax: () => null
 	},
 	UPDATE: {
 		name: "update",
 		method: Method.PATCH,
 		path: (model) => "/" + model.getName() + "/:id",
-		handler: (h) => h.update
+		handler: (h) => h.update,
+		syntax: () => null
 	},
 	DELETE: {
 		name: "delete",
 		method: Method.DELETE,
 		path: (model) => "/" + model.getName() + "/:id",
-		handler: (h) => h.delete
+		handler: (h) => h.delete,
+		syntax: () => null
 	},
 	LIST: {
 		name: "list",
 		method: Method.GET,
-		path: (model) => "/" + inflection.pluralize(model.getName()) + "/" + "<FILTERS>",
-		handler: (h) => h.list
+		path: (model) => "/" + inflection.pluralize(model.getName()) + "<SYNTAX>",
+		handler: (h) => h.list,
+		syntax: (model) => new ListSyntax(model)
 	}
 };
 
@@ -60,6 +67,10 @@ class Endpoint {
 		this.method = type.method.name;
 		this.path = type.path(model);
 		this.handler = type.handler(handler);
+		this.syntax = type.syntax(model);
+
+		if (this.syntax)
+			this.path = this.path.replace("<SYNTAX>", this.syntax.getPathString());
 	}
 
 }

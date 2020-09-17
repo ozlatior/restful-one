@@ -9,6 +9,9 @@ class Property {
 		if (template.property)
 			this.name = template.property;
 		this.type = template.type;
+		if (template.properties) {
+			// TODO: handle this, also in toString function
+		}
 	}
 
 	getName () {

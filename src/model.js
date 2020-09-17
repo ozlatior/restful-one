@@ -139,6 +139,10 @@ class Model {
 		return this.keys;
 	}
 
+	getAttributes () {
+		return this.attributes;
+	}
+
 	getAttributeByName (name) {
 		for (let i=0; i<this.attributes.length; i++)
 			if (this.attributes[i].getName() === name)
