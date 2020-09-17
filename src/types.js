@@ -25,6 +25,38 @@ class DataType {
 	constructor () {
 		this.type = null;
 		this.primitive = null;
+		this.properties = {
+			enumerable: false,
+			comparable: false,
+			searchable: false,
+			fragmentable: false,
+			absentValue: null
+		};
+	}
+
+	applyProperties (p) {
+		for (let i in p)
+			this.properties[i] = p[i];
+	}
+
+	isEnumerable () {
+		return this.properties.enumerable;
+	}
+
+	isComparable () {
+		return this.properties.comparable;
+	}
+
+	isSearchable () {
+		return this.properties.searchable;
+	}
+
+	isFragmentable () {
+		return this.properties.fragmentable;
+	}
+
+	hasAbsentValue () {
+		return (this.properties.absentValue !== null);
 	}
 
 	getDefault () {
@@ -35,6 +67,10 @@ class DataType {
 		if (this.primitive !== null)
 			return this.primitive(value);
 		return false;
+	}
+
+	isAbsent (value) {
+		return (this.properties.absentValue !== null) && (this.properties.absentValue === value);
 	}
 
 	isValidString (value) {
@@ -65,6 +101,7 @@ class NumberType extends DataType {
 		super ();
 		this.type = "number";
 		this.primitive = Primitive.NUMBER;
+		this.properties.comparable = true;
 		this.min = min !== undefined ? min : -Infinity;
 		this.max = max !== undefined ? max : +Infinity;
 		this.mul = mul !== undefined ? mul : 1;	// TODO: not implemented
@@ -197,6 +234,7 @@ class BooleanType extends DataType {
 		super ();
 		this.type = "boolean";
 		this.primitive = Primitive.BOOLEAN;
+		this.properties.enumerable = true;
 		this.values = [ "0", "1", "f", "t", "false", "true" ];
 	}
 
@@ -247,6 +285,9 @@ class StringType extends DataType {
 		super ();
 		this.type = "string";
 		this.primitive = Primitive.STRING;
+		this.properties.enumerable = true;
+		this.properties.searchable = true;
+		this.properties.fragmentable = true;
 		this.maxlen = len ? len : 255;
 		this.encoding = encoding;	// TODO: implement binary and other encoding
 	}
@@ -411,6 +452,8 @@ class DateType extends DataType {
 		super ();
 		this.type = "date";
 		this.primitive = Primitive.DATE;
+		this.properties.comparable = true;
+		this.properties.searchable = true;
 		this.date = date === undefined ? true : date;
 		this.time = time === undefined ? true : time;
 	}
