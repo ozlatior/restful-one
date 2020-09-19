@@ -15,33 +15,33 @@ const Relationship = {
 const Primitive = {
 	BOOLEAN: {
 		name: "BOOLEAN",
-		fromString: (str) => [ "1", "t", "true", "yes" ].indexOf(a.toLowerCase()) !== -1,
+		fromString: (str) => [ "1", "t", "true", "yes" ].indexOf(str.toLowerCase()) !== -1,
 		isValid: (a) => typeof(a) === "boolean",
-		isValidStr: (a) => [ "0", "1", "t", "f", "true", "false", "yes", "no" ].indexOf(a.toLowerCase()) !== -1
+		isValidString: (a) => [ "0", "1", "t", "f", "true", "false", "yes", "no" ].indexOf(a.toLowerCase()) !== -1
 	},
 	NUMBER: {
 		name: "NUMBER",
 		fromString: (str) => parseFloat(str),
 		isValid: (a) => typeof(a) === "number",
-		isValidStr: (a) => true // TODO: proper validation
+		isValidString: (a) => true // TODO: proper validation
 	},
 	STRING: {
 		name: "STRING",
 		fromString: (str) => str,
 		isValid: (a) => typeof(a) === "string",
-		isValidStr: (a) => true
+		isValidString: (a) => true
 	},
 	OBJECT: {
 		name: "OBJECT",
 		fromString: (str) => JSON.parse(str),
 		isValid: (a) => typeof(a) === "object",
-		isValidStr: (a) => true
+		isValidString: (a) => true
 	},
 	DATE: {
 		name: "DATE",
 		fromString: (str) => new Date(str),
 		isValid: (a) => (typeof(a) === "object") && (a instanceof Date),
-		isValidStr: (a) => true
+		isValidString: (a) => true
 	}
 };
 
