@@ -11,9 +11,9 @@ const indentationArray = function (ind, depth) {
 		str += tab;
 	}
 	return ret;
-}
+};
 
-const kvPair = function(key, value, kq, vq) {
+const kvPair = function (key, value, kq, vq) {
 	let ret = "";
 	if (kq)
 		ret += "\"";
@@ -27,7 +27,20 @@ const kvPair = function(key, value, kq, vq) {
 	if (vq)
 		ret += "\"";
 	return ret;
-}
+};
+
+const objectToHtml = function (obj, inlineStyle) {
+	let out = JSON.stringify(obj, null, 2);
+	out = out.split("\n").join("</div><div>").replace(/ /g, "&nbsp;");
+	out = "<div>" + out;
+	if (inlineStyle)
+		out = "<div style='font-family: monospace'>" + out;
+	else
+		out = "<div>" + out;
+	out += "</div></div>";
+	return out;
+};
 
 module.exports.indentationArray = indentationArray;
 module.exports.kvPair = kvPair;
+module.exports.objectToHtml = objectToHtml;
