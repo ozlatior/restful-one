@@ -69,8 +69,32 @@ class Endpoint {
 		this.handler = type.handler(handler);
 		this.syntax = type.syntax(model);
 
-		if (this.syntax)
+		if (this.syntax) {
 			this.path = this.path.replace("<SYNTAX>", this.syntax.getPathString());
+			this.handler.setSyntaxHandler(this.syntax);
+		}
+	}
+
+	getEndpointFn (app) {
+		switch (this.method) {
+			case "GET":
+				return app.get.bind(app);
+			case "POST":
+				return app.post.bind(app);
+			case "PUT":
+				return app.put.bind(app);
+			case "PATCH":
+				return app.patch.bind(app);
+			case "DELETE":
+				return app.delete.bind(app);
+		}
+		return null;
+	}
+
+	applyToApp (app) {
+		let fn = this.getEndpointFn(app);
+		fn(this.path, this.handler.before());
+		fn(this.path, this.handler.handle());
 	}
 
 }

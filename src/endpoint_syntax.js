@@ -48,6 +48,14 @@ class Keyword {
 		return ret;
 	}
 
+	isArray () {
+		return this.array;
+	}
+
+	getValueLength () {
+		return this.length ? this.length : 1;
+	}
+
 	getPathLength () {
 		return this.pathLength;
 	}
@@ -87,7 +95,7 @@ Keyword.fromProperty = function (property) {
 
 	// add absent value checker for absent value properties
 	if (type.hasAbsentValue())
-		ret.push(new Keyword(noun, Verbs.has, primitive));
+		ret.push(new Keyword(noun, Verbs.has, Primitive.BOOLEAN));
 
 	return ret;
 };
@@ -109,6 +117,15 @@ class EndpointSyntax {
 		if (this.keywords[noun] === undefined)
 			this.keywords[noun] = [];
 		this.keywords[noun].push(new Keyword(noun, verb, type, len));
+	}
+
+	getKeyword (noun, verb) {
+		if (this.keywords[noun] === undefined)
+			return null;
+		for (let i=0; i<this.keywords[noun].length; i++)
+			if (this.keywords[noun][i].verb === verb)
+				return this.keywords[noun][i];
+		return null;
 	}
 
 	addKeywordsFromProperty (property) {
@@ -143,6 +160,64 @@ class EndpointSyntax {
 	computePath () {
 		this.computePathLength();
 		this.computePathString();
+	}
+
+	extractNext (arr) {
+		let noun = arr[0];
+		if (this.keywords[noun] === undefined || this.keywords[noun].length === 0)
+			return { "error": "No such parameter noun " + noun };
+		arr.shift();
+		let verb = arr[0];
+		let kw = this.getKeyword(noun, verb);
+		if (kw !== null)
+			arr.shift();
+		else {
+			kw = this.getKeyword(noun, null);
+			if (kw === null)
+				return { "error": "No such parameter verb " + verb + " for noun " + noun };
+			verb = Verbs.is;
+		}
+		let value = [];
+		let len = kw.getValueLength();
+		for (let i=0; i<len; i++) {
+			if (!arr.length)
+				return { "error": "Unexpected end of parameter list / missing value for noun " + noun };
+			let toPush = arr.shift();
+			if (!kw.type.isValidString(toPush))
+				return { "error": "Invalid value for noun " + noun + ": " + toPush };
+			value.push(kw.type.fromString(toPush));
+		}
+		if (!kw.isArray())
+			value = value[0];
+		let ret = {};
+		ret[noun] = {};
+		ret[noun][verb] = value;
+		return ret;
+	}
+
+	extractParams (source, target) {
+		let arr = [];
+		let i = 0;
+		while (source["p"+i] !== undefined) {
+			arr[i] = source["p"+i];
+			i++;
+		}
+		target.args = arr.slice(0);
+		while (arr.length) {
+			let args = this.extractNext(arr);
+			for (let i in args) {
+				if (typeof(args[i]) === "object") {
+					if (target[i] === undefined)
+						target[i] = {};
+					for (let j in args[i])
+						target[i][j] = args[i][j];
+				}
+				else
+					target[i] = args[i];
+			}
+			if (args.error)
+				break;
+		}
 	}
 
 	getPathLength () {
